@@ -1,0 +1,16 @@
+torch
+torchaudio
+torchvision
+transformers
+librosa
+scikit-learn
+numpy
+pandas
+tqdm
+shap
+opencv-python
+joblib
+mediapipe
+textgrid
+matplotlib
+seaborn
