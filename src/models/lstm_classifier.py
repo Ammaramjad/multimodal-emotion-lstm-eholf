@@ -70,22 +70,26 @@ class MultimodalLSTMClassifier(nn.Module):
         Returns:
             torch.Tensor: Logits for each class (batch_size, num_classes)
         """
+        # Validate that all expected modalities are present
+        missing_modalities = set(self.modality_lstms.keys()) - set(inputs.keys())
+        if missing_modalities:
+            raise ValueError(f"Missing required modalities in input: {missing_modalities}")
+        
         modality_outputs = []
         
         # Process each modality through its LSTM
         for modality, lstm in self.modality_lstms.items():
-            if modality in inputs:
-                x = inputs[modality]
-                lstm_out, (hidden, cell) = lstm(x)
-                
-                # Use the last hidden state
-                if self.bidirectional:
-                    # Concatenate forward and backward hidden states
-                    hidden = torch.cat((hidden[-2], hidden[-1]), dim=1)
-                else:
-                    hidden = hidden[-1]
-                
-                modality_outputs.append(hidden)
+            x = inputs[modality]
+            lstm_out, (hidden, cell) = lstm(x)
+            
+            # Use the last hidden state
+            if self.bidirectional:
+                # Concatenate forward and backward hidden states
+                hidden = torch.cat((hidden[-2], hidden[-1]), dim=1)
+            else:
+                hidden = hidden[-1]
+            
+            modality_outputs.append(hidden)
         
         # Concatenate all modality outputs
         fused = torch.cat(modality_outputs, dim=1)
