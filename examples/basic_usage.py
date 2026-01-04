@@ -202,7 +202,7 @@ def eholf_optimization_example():
             
             # Create data loaders
             data_loader = MultimodalDataLoader(
-                batch_size=params['batch_size'],
+                batch_size=int(params['batch_size']),
                 shuffle=True
             )
             train_loader, val_loader = data_loader.create_train_val_loaders(
@@ -273,7 +273,7 @@ def eholf_optimization_example():
     )
     
     data_loader = MultimodalDataLoader(
-        batch_size=best_params['batch_size'],
+        batch_size=int(best_params['batch_size']),
         shuffle=True
     )
     train_loader, val_loader = data_loader.create_train_val_loaders(

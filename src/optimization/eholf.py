@@ -79,9 +79,35 @@ class EHOLF:
                     log_max = np.log10(param_config['max'])
                     individual[param_name] = 10 ** np.random.uniform(log_min, log_max)
             
+            # Convert numpy types to Python native types
+            individual = self._convert_to_native_types(individual)
             population.append(individual)
         
         return population
+    
+    def _convert_to_native_types(self, individual: Dict) -> Dict:
+        """Convert numpy types to Python native types."""
+        converted = {}
+        for param_name, value in individual.items():
+            param_config = self.param_space[param_name]
+            param_type = param_config['type']
+            
+            if param_type == 'int':
+                converted[param_name] = int(value)
+            elif param_type == 'float' or param_type == 'log':
+                converted[param_name] = float(value)
+            elif param_type == 'categorical':
+                # Ensure categorical values are Python native types
+                if isinstance(value, np.integer):
+                    converted[param_name] = int(value)
+                elif isinstance(value, np.floating):
+                    converted[param_name] = float(value)
+                else:
+                    converted[param_name] = value
+            else:
+                converted[param_name] = value
+        
+        return converted
     
     def _mutate(self, individual: Dict) -> Dict:
         """Apply mutation to an individual."""
@@ -124,7 +150,7 @@ class EHOLF:
                     )
                     mutated[param_name] = 10 ** new_log_val
         
-        return mutated
+        return self._convert_to_native_types(mutated)
     
     def _crossover(self, parent1: Dict, parent2: Dict) -> Tuple[Dict, Dict]:
         """Perform crossover between two parents."""
@@ -142,7 +168,7 @@ class EHOLF:
                 child1[param_name] = parent2[param_name]
                 child2[param_name] = parent1[param_name]
         
-        return child1, child2
+        return self._convert_to_native_types(child1), self._convert_to_native_types(child2)
     
     def _select_parents(self, population: List[Dict], fitness_scores: List[float]) -> Tuple[Dict, Dict]:
         """Select two parents using tournament selection."""
